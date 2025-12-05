@@ -14,9 +14,12 @@
                 <div class="mb-6">
                     <span class="text-3xl font-bold text-blue-600">{{ number_format($product['price'], 0, ',', ' ') }} ₴</span>
                 </div>
-                <button onclick="addToCart({{ $product['id'] }}, '{{ addslashes($product['name']) }}', {{ $product['price'] }})" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors text-lg font-semibold">
-                    Додати в кошик
-                </button>
+                <form method="POST" action="{{ route('cart.add') }}" class="flex items-center space-x-2">
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $product['id'] }}">
+                    <input type="number" name="quantity" value="1" min="1" max="100" class="w-20 border rounded px-2 py-1">
+                    <button type="submit" class="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors text-lg font-semibold">Додати в кошик</button>
+                </form>
             </div>
         </div>
     </div>

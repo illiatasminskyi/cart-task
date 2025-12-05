@@ -15,15 +15,31 @@
                         <th class="py-2 px-4">Кількість</th>
                         <th class="py-2 px-4">Ціна</th>
                         <th class="py-2 px-4">Сума</th>
+                        <th class="py-2 px-4">Дії</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($cartItems as $item)
                     <tr>
                         <td class="py-2 px-4">{{ $item->product->name }}</td>
-                        <td class="py-2 px-4">{{ $item->quantity }}</td>
+                        <td class="py-2 px-4">
+                            <form method="POST" action="{{ route('cart.update') }}" class="flex items-center space-x-2">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="item_id" value="{{ $item->id }}">
+                                <input type="number" name="quantity" value="{{ $item->quantity }}" min="1" max="100" class="w-16 border rounded px-2 py-1">
+                                <button type="submit" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Оновити</button>
+                            </form>
+                        </td>
                         <td class="py-2 px-4">{{ number_format($item->product->price, 0, ',', ' ') }} ₴</td>
                         <td class="py-2 px-4">{{ number_format($item->product->price * $item->quantity, 0, ',', ' ') }} ₴</td>
+                        <td class="py-2 px-4">
+                            <form method="POST" action="{{ route('cart.remove', $item->id) }}" onsubmit="return confirm('Видалити товар з кошика?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Видалити</button>
+                            </form>
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>

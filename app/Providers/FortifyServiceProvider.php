@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Events\Login;
+use App\Models\Cart;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -29,6 +32,38 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+
+        Event::listen(Login::class, function ($event) {
+            $user = $event->user;
+            $sessionId = session()->get('guest_session_id');
+            $guestCart = $sessionId ? Cart::where('session_id', $sessionId)->first() : null;
+            $userCart = Cart::where('user_id', $user->id)->first();
+            if ($guestCart) {
+                if ($userCart) {
+                    foreach ($guestCart->items as $item) {
+                        $existing = $userCart->items()->where('product_id', $item->product_id)->first();
+                        if ($existing) {
+                            $existing->quantity += $item->quantity;
+                            $existing->save();
+                            $item->delete();
+                        } else {
+                            $item->cart_id = $userCart->id;
+                            $item->user_id = $user->id;
+                            $item->save();
+                        }
+                    }
+                    $guestCart->delete();
+                } else {
+                    $guestCart->user_id = $user->id;
+                    $guestCart->session_id = null;
+                    $guestCart->save();
+                    foreach ($guestCart->items as $item) {
+                        $item->user_id = $user->id;
+                        $item->save();
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -45,13 +80,13 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureViews(): void
     {
-        Fortify::loginView(fn () => view('livewire.auth.login'));
-        Fortify::verifyEmailView(fn () => view('livewire.auth.verify-email'));
-        Fortify::twoFactorChallengeView(fn () => view('livewire.auth.two-factor-challenge'));
-        Fortify::confirmPasswordView(fn () => view('livewire.auth.confirm-password'));
-        Fortify::registerView(fn () => view('livewire.auth.register'));
-        Fortify::resetPasswordView(fn () => view('livewire.auth.reset-password'));
-        Fortify::requestPasswordResetLinkView(fn () => view('livewire.auth.forgot-password'));
+        Fortify::loginView(fn() => view('livewire.auth.login'));
+        Fortify::verifyEmailView(fn() => view('livewire.auth.verify-email'));
+        Fortify::twoFactorChallengeView(fn() => view('livewire.auth.two-factor-challenge'));
+        Fortify::confirmPasswordView(fn() => view('livewire.auth.confirm-password'));
+        Fortify::registerView(fn() => view('livewire.auth.register'));
+        Fortify::resetPasswordView(fn() => view('livewire.auth.reset-password'));
+        Fortify::requestPasswordResetLinkView(fn() => view('livewire.auth.forgot-password'));
     }
 
     /**
@@ -64,7 +99,7 @@ class FortifyServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
+            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())) . '|' . $request->ip());
 
             return Limit::perMinute(5)->by($throttleKey);
         });

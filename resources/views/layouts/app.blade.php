@@ -23,7 +23,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13l-1.1 5M7 13h10m0 0v8a2 2 0 002 2h-8a2 2 0 01-2-2v-8z"></path>
                             </svg>
                             Кошик
-                            <span id="cart-count" class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">0</span>
+                            <span id="cart-count" class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">{{ isset($cartCount) ? $cartCount : 0 }}</span>
                         </span>
                     </a>
                     @guest
