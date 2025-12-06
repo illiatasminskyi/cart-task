@@ -154,4 +154,19 @@ return [
         ]),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Redirects
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify the redirect paths for various Fortify actions.
+    |
+    */
+
+    'redirects' => [
+        'login' => '/',
+        'register' => '/',
+        'logout' => '/',
+    ],
+
 ];
