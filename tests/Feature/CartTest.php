@@ -52,7 +52,6 @@ test('it increases quantity if product already in cart', function () {
 });
 
 test('it adds product for guest and user separately', function () {
-    // Гість
     $service = new CartService();
     $guestCart = $service->getCart();
     $product = Product::factory()->create();
@@ -61,7 +60,6 @@ test('it adds product for guest and user separately', function () {
     expect($guestItem)->not->toBeNull();
     expect($guestItem->user_id)->toBeNull();
 
-    // Авторизований користувач
     $user = User::factory()->create();
     $this->actingAs($user);
     $userCart = $service->getCart();
