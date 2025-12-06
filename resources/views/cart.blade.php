@@ -11,6 +11,7 @@
             <table class="min-w-full bg-white rounded shadow">
                 <thead>
                     <tr>
+                        <th class="py-2 px-4">Зображення</th>
                         <th class="py-2 px-4">Товар</th>
                         <th class="py-2 px-4">Кількість</th>
                         <th class="py-2 px-4">Ціна</th>
@@ -21,6 +22,9 @@
                 <tbody>
                     @foreach($cartItems as $item)
                     <tr>
+                        <td class="py-2 px-4">
+                            <img src="{{ $item->product->image }}" alt="{{ $item->product->name }}" class="w-20 h-14 object-cover rounded border" />
+                        </td>
                         <td class="py-2 px-4">{{ $item->product->name }}</td>
                         <td class="py-2 px-4">
                             <form method="POST" action="{{ route('cart.update') }}" class="flex items-center space-x-2">

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Log;
+
 use App\Models\Cart;
 use Illuminate\Support\Facades\Auth;
 
@@ -9,9 +11,11 @@ class CartService implements CartServiceInterface
 {
     public function getCart()
     {
+        Log::info('CartService@getCart', ['auth_id' => \Illuminate\Support\Facades\Auth::id()]);
         if (Auth::check()) {
+            $userId = Auth::id();
             $cart = Cart::firstOrCreate([
-                'user_id' => Auth::id(),
+                'user_id' => $userId,
             ]);
         } else {
             $sessionId = session()->getId();
@@ -24,6 +28,10 @@ class CartService implements CartServiceInterface
 
     public function addProduct(Cart $cart, $productId, $quantity = 1, $userId = null)
     {
+        // Гарантуємо, що user_id завжди передається для авторизованого користувача
+        if ($userId === null && Auth::check()) {
+            $userId = Auth::id();
+        }
         $item = $cart->items()->where('product_id', $productId)->first();
         if ($item) {
             $item->quantity += $quantity;
@@ -41,8 +49,12 @@ class CartService implements CartServiceInterface
     {
         $item = $cart->items()->where('id', $itemId)->first();
         if ($item) {
-            $item->quantity = $quantity;
-            $item->save();
+            if ($quantity <= 0) {
+                $item->delete();
+            } else {
+                $item->quantity = $quantity;
+                $item->save();
+            }
         }
     }
 

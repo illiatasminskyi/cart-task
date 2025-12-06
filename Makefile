@@ -88,6 +88,9 @@ d-restart:
 	@echo "🧹 Очищення кешу..."
 	@$(MAKE) d-clean
 
+d-test:
+	$(DOCKER_COMPOSE) exec $(DOCKER_APP) php artisan test
+
 # Показати логи контейнерів
 d-logs:
 	$(DOCKER_COMPOSE) logs -f
